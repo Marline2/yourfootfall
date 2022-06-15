@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<issues format="6" by="lint 7.1.3" type="baseline" client="gradle" dependencies="false" name="AGP (7.1.3)" variant="fatal" version="7.1.3">
+
+    <issue
+        id="DuplicateIds"
+        message="Duplicate id `@+id/imageView`, already defined earlier in this layout"
+        errorLine1="      android:id=&quot;@+id/imageView&quot;"
+        errorLine2="      ~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/layout/activity_main.xml"
+            line="92"
+            column="7"/>
+        <location
+            file="src/main/res/layout/activity_main.xml"
+            line="82"
+            column="7"
+            message="Duplicate id `@+id/imageView` originally defined here"/>
+    </issue>
+
+    <issue
+        id="DuplicateIds"
+        message="Duplicate id `@+id/imageView`, already defined earlier in this layout"
+        errorLine1="      android:id=&quot;@+id/imageView&quot;"
+        errorLine2="      ~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/layout/activity_main.xml"
+            line="102"
+            column="7"/>
+        <location
+            file="src/main/res/layout/activity_main.xml"
+            line="82"
+            column="7"
+            message="Duplicate id `@+id/imageView` originally defined here"/>
+    </issue>
+
+</issues>
