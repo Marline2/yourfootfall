@@ -12,23 +12,31 @@ import android.widget.Button;
 import android.widget.TextView;
 
 public class MainActivity extends AppCompatActivity {
+
     //define variables
     TextView text1, text2, text3, ing, text4;
     SensorManager manager;
     SensorEventListener listener;
     Button startbtn;
+
     long startTime, nowTime;
     long times;
+
     float currentAcc, lastAcc, distance, effectiveAcc;
     float totaldistance= 0;
+
     float totalX, totalY, totalXs, totalYs, totalNot;
     float totalZ, totalZs;
-    String num, rZ, rZs, num5, num6;
+    String num, rZ, rZs;
+
     float num2;
     int btnnum=0;
     boolean accel = false;
     boolean rotate = false;
     boolean pre = false;
+    final static int FREQ = 1;
+    int mOrientCount;
+    float azims;
 
     float totalheight, totalheight2 = 0;
     float th, ths;
@@ -36,12 +44,16 @@ public class MainActivity extends AppCompatActivity {
     float[] Accel = new float[3];
     float[] Rotate = new float[3];
     float[] Press = new float[3];
-
-    float x, y, z, azim, pz;
+    float [] values1 = new float[3];
+    int T;
+    float x, y, z, pz;
     float height, nowheight, disheight, changeheight, changeheight2, nowheight2, disheight2;
-
+    float azim;
 
     float NS2S = 1.0f/1000000000.0f;
+
+    float [] Rs = new float[9];
+    float [] Is = new float[9];
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -60,7 +72,7 @@ public class MainActivity extends AppCompatActivity {
 
         manager = (SensorManager) getSystemService(SENSOR_SERVICE); //센서관리객체설정
         Sensor accelrometer = manager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
-        Sensor Rotation = manager.getDefaultSensor(Sensor.TYPE_ORIENTATION);
+        Sensor Rotation = manager.getDefaultSensor(Sensor.TYPE_MAGNETIC_FIELD);
         Sensor Pressure = manager.getDefaultSensor(Sensor.TYPE_PRESSURE);
         listener = new SensorEventListener() {
 
@@ -76,11 +88,13 @@ public class MainActivity extends AppCompatActivity {
                     System.arraycopy(event.values, 0, Rotate, 0, event.values.length);
                     rotate = true;
 
-                } else if(event.sensor == Pressure){
+                }
+                else if(event.sensor == Pressure){
                     System.arraycopy(event.values, 0, Press, 0, event.values.length);
                     pre = true;
                 }
                 if((accel && rotate) && pre ){
+                    ///////////////이동거리////////////
                     x = Accel[0];
                     y = Accel[1];
                     z = Accel[2];
@@ -102,34 +116,51 @@ public class MainActivity extends AppCompatActivity {
 
                     num2 = totalZ + totalZs;
 
-
-                    azim=Rotate[0];
-
-                    text3.setText("방향 측정 중.. \n");
-
                     if(num2 <0){
                         text2.append("총 이동 고도는 0m입니다. \n");
                     }else{
                         text2.append("총 이동 고도는"+String.format("%.2f", num2/2)+"m입니다. \n");
+
                     }
 
-                    if(azim>=315 || (0<=azim && azim <45)){
-                        text3.setText("당신은 앞을 향했습니다."+"\n\n");
+                    /////////////////방향/////////////////
+
+                    SensorManager.getRotationMatrix(Rs,Is,Accel,Rotate);
+                    SensorManager.getOrientation(Rs, values1);
+
+                    //방위값(라디언단위) -> 각도단위로 변경
+                    azim = (float) Math.toDegrees(values1[0]);
+                    if(mOrientCount++ % FREQ != 0) return;
+                    T = mOrientCount / FREQ ;
+
+                    if (T == 1){
+                        azims = azim;
+                    }
+
+                    float ro = azim-azims;
+                    text3.setText("방향 측정 중.. "+ro+"\n");
+                    if((0>=ro && ro>-45) || (0<=ro && ro<45)) {
+                        text3.setText("당신은 앞을 향했습니다." + "\n\n");
                         totalY = 0;
-                        totalY +=totaldistance - totalX - totalXs - totalYs;
-                    }else if(azim>=45 && azim<135){
-                        text3.setText("당신은 오른쪽을 향했습니다."+"\n\n");
+                        totalY += totaldistance - totalX - totalXs - totalYs;
+
+                    } else if((ro>=45 && ro<135)||(ro<=-225 && ro>-315)) {
+                        text3.setText("당신은 오른쪽을 향했습니다." + "\n\n");
                         totalX = 0;
                         totalX += totaldistance - totalY - totalXs - totalYs;
-                    }else if(azim>=135 && azim<225){
-                        text3.setText("당신은 뒤를 향했습니다."+"\n\n");
+
+                    } else if((ro<=-135 && ro>-225)||(ro>=135 && ro<225)){
+                        text3.setText("당신은 뒤로 향했습니다."+"\n\n");
                         totalYs = 0;
                         totalYs += totaldistance - totalX - totalXs - totalY;
-                    }else if(azim>=225 && azim<315){
+
+                    } else if((ro<=-45 && ro>-135)||(ro>=225 && ro<315) ){
                         text3.setText("당신은 왼쪽을 향했습니다."+"\n\n");
                         totalXs = 0;
-                        totalXs += totaldistance - totalX - totalY - totalYs;
+                        totalXs += totaldistance - totalX - totalYs - totalY;
+
                     }
+
 
                     String TY = String.format("%.2f", totalY/100000000);
                     text3.append("앞쪽으로"+TY+"m를 갔습니다."+"\n");
@@ -139,7 +170,7 @@ public class MainActivity extends AppCompatActivity {
                     text3.append("뒤쪽으로"+TYs+"m를 갔습니다."+"\n");
                     String TXs = String.format("%.2f", totalXs/100000000);
                     text3.append("왼쪽으로"+TXs+"m를 갔습니다."+"\n\n");
-
+//////////////////고도////////////////////
                     pz = Press[0];
 
                     pz = (float) (Math.round(pz*100)/100.0);
@@ -189,13 +220,10 @@ public class MainActivity extends AppCompatActivity {
                     text4.append("아래쪽으로"+rZs+"m를 갔습니다.\n");
 
                 }
-            }
-
+        }
             @Override
             public void onAccuracyChanged(Sensor sensor, int accuracy) {
-
             }
-
         };
 
 
@@ -209,6 +237,7 @@ public class MainActivity extends AppCompatActivity {
                 manager.unregisterListener(listener, Rotation);
                 manager.unregisterListener(listener, Pressure);
 
+
             }else if(btnnum == 1){
                 boolean chk = manager.registerListener(listener, accelrometer, SensorManager.SENSOR_DELAY_UI);
                 boolean chk2 = manager.registerListener(listener, Rotation, SensorManager.SENSOR_DELAY_UI);
@@ -217,11 +246,11 @@ public class MainActivity extends AppCompatActivity {
                 if (!chk) {
                     text1.setText("가속도 센서 지원하지 않습니다.");
                 } else if (!chk2) {
-                    text3.setText("자이로스코프 센서 지원하지 않습니다.");
+                    text1.setText("방향 센서 지원하지 않습니다.");
                 } else if(!chk3){
-                    text3.setText("기압 센서 지원하지 않습니다.");
+                    text1.setText("기압 센서 지원하지 않습니다.");
                 }
-
+                mOrientCount = 0;
                 totaldistance=0;
                 totalX = 0;
                 totalXs = 0;
@@ -232,29 +261,29 @@ public class MainActivity extends AppCompatActivity {
                 totalZ = 0;
                 totalZs = 0;
                 totalNot = 0;
-
-
                 ing.setText("세팅 중...");
                 startbtn.setText("세팅 끝내기");
+
             }else if(btnnum %2 == 0){
                 ing.setText("측정 완료");
                 startbtn.setText("다시 측정하기");
                 manager.unregisterListener(listener, accelrometer);
                 manager.unregisterListener(listener, Rotation);
                 manager.unregisterListener(listener, Pressure);
+
             }else{
                 boolean chk = manager.registerListener(listener, accelrometer, SensorManager.SENSOR_DELAY_UI);
                 boolean chk2 = manager.registerListener(listener, Rotation, SensorManager.SENSOR_DELAY_UI);
                 boolean chk3 = manager.registerListener(listener, Pressure, SensorManager.SENSOR_DELAY_UI);
 
                 if (!chk) {
-                    text2.setText("가속도 센서 지원하지 않습니다.");
+                    text1.setText("가속도 센서 지원하지 않습니다.");
                 } else if (!chk2) {
-                    text2.setText("자이로스코프 센서 지원하지 않습니다.");
+                    text1.setText("방향 센서 지원하지 않습니다.");
                 } else if(!chk3){
-                    text2.setText("기압 센서 지원하지 않습니다.");
+                    text1.setText("기압 센서 지원하지 않습니다.");
                 }
-
+                mOrientCount = 0;
                 totaldistance=0;
                 totalX = 0;
                 totalXs = 0;
@@ -266,15 +295,9 @@ public class MainActivity extends AppCompatActivity {
                 totalZs = 0;
                 totalNot = 0;
 
-
                 ing.setText("측정 중...");
                 startbtn.setText("측정 끝내기");
-
             }
-
         });
-
-
-
     }
-}
+};
