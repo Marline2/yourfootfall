@@ -1,5 +1,7 @@
 # 당신의발걸음(your footfalls): 센서를 사용한 이동 거리
 안드로이드 스튜디오를 사용한 이동 거리 측정 애플리케이션 <br/>
+구글 플레이 스토어에서 만나보실 수 있습니다!<br/>
+https://play.google.com/store/apps/details?id=com.mar.yourfootfall<br/><br/>
 
 
 
