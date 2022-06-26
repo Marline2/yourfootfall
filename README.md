@@ -5,7 +5,7 @@ https://play.google.com/store/apps/details?id=com.mar.yourfootfall<br/><br/>
 
 
 
-시연 영상 : 준비 중.. <br/>
+시연 영상 : https://youtube.com/shorts/wp0_bpzRzao?feature=share <br/>
 기기에 내장된 가속도 센서, 지자기 센서, 기압 센서를 이용하여 만든 앱입니다. <br/>
 총 이동거리와 사용자의 위치에서 바라본 방향으로 이동한 거리, 총 이동 고도와 이동한 높이를 나타냅니다. <br/>
 (**기기를 손에 쥐고 흔들며 걸어야 이동 거리의 정확한 측정이 이뤄집니다.) <br/><br/>
